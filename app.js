@@ -1,29 +1,29 @@
-const express = require("express");
-const app = express();
-const port = 3000;
-const tasks = require("./routes/tasks");
-const connectDB = require("./db/connect");
-require('dotenv').config()
-app.use(express.static("./public"))
-app.use(express.json())
-// routes
-app.get("/", (req, res) => {
-    res.send("Task manager")
-})
-app.use("/api/v1/tasks", tasks)
+const routes = require("./routes/route");
 
-const start = async()=>{
-    try {
-        await connectDB(process.env.MONGO_URL);
-        app.listen(port, console.log(`server is listening on port ...${port}`))
-    } catch (error) {
-        console.log(error)
-    }
-}
-start()
+const fastify = require("fastify")({
+	logger: true,
+});
+require("dotenv").config();
+const port = process.env.PORT || 3000;
 
-// app.get('api/v1/tasks')   -get all tasks
-// app.post('api/v1/tasks')   -creat new task
-// app.get('api/v1/tasks/:id')   -get single task
-// app.patch('api/v1/tasks/:id')   -edit  task
-// app.delete('api/v1/tasks/:id')   -delete  task
+// register the database in plugin
+fastify.register(require("@fastify/postgres"), {
+	connectionString: process.env.PG_URL,
+});
+
+// register the route plugin
+
+fastify.register(routes);
+const start = async () => {
+	try {
+		// then create server
+		fastify.listen({ port }, (err) => {
+			if (err) throw err;
+			console.log(`server listening on ${fastify.server.address().port}`);
+		});
+	} catch (err) {
+		fastify.log.error(err);
+		process.exit(1);
+	}
+};
+start();
