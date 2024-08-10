@@ -49,6 +49,20 @@ async function deleteTodo(id) {
 		console.error(error.message);
 	}
 }
+async function updateTodo(id) {
+	try {
+		const response = await fetch(`${baseUrl}/todos/${id}`, {
+			method: "PATCH",
+			body: JSON.stringify({ done: true }),
+			headers: {
+				"Content-Type": "application/json",
+			},
+		});
+		return response.ok;
+	} catch (error) {
+		console.error(error.message);
+	}
+}
 document.addEventListener("DOMContentLoaded", async () => {
 	const todos = await getAllTodos();
 	const taskTemplate = document.querySelector(".task"); // This is the template task element
@@ -56,6 +70,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const task = document.querySelector(".task");
 		task.setAttribute("data-id", todo.id);
 		const copiedTask = task.cloneNode(true);
+		if (todo.done) {
+			const doneButton = copiedTask.querySelector(".done");
+			doneButton.remove();
+			copiedTask.classList.add("highlight");
+		}
 		copiedTask.querySelector("p").textContent = todo.name;
 		taskContainer.appendChild(copiedTask);
 	});
@@ -70,6 +89,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 			console.log(res);
 			if (res) {
 				parentTask.remove();
+			}
+		});
+	});
+	const doneButtons = document.querySelectorAll(".done"); // Returns a NodeList
+	doneButtons.forEach((doneButton) => {
+		doneButton.addEventListener("click", async (e) => {
+			const parentTask = doneButton.closest(".task");
+			console.log(parentTask);
+			const id = parentTask.getAttribute("data-id");
+			const res = await updateTodo(id);
+			console.log(res);
+			if (res) {
+				// delete the done button
+				doneButton.remove();
+				parentTask.classList.add("highlight");
 			}
 		});
 	});
@@ -118,41 +152,6 @@ async function createTask(name) {
 	inputAddButton.value = "";
 	if (res) {
 		copiedTask.querySelector("p").textContent = name;
-		taskContainer.appendChild(copiedTask);
-	}
-}
-
-// async function deleteTask() {
-
-// }
-function updateTask() {
-	const task = document.querySelector(".task");
-	let inputContent = document.getElementById("addItem").value;
-	task.querySelector("p").textContent = inputContent;
-	taskContainer.classList.remove("none");
-	inputAddButton.value = "";
-}
-
-// addButton.addEventListener("click", updateOrCreateTask);
-
-// inputAddButton.addEventListener("keypress", (event) => {
-// 	if (event.key === "Enter") {
-// 		updateOrCreateTask();
-// 	}
-// });
-let count = taskContainer.childElementCount;
-function updateOrCreateTask() {
-	let inputContent = document.getElementById("addItem").value;
-	const task = document.querySelector(".task");
-	if (count === 1) {
-		task.querySelector("p").textContent = inputContent;
-		taskContainer.classList.remove("none");
-		inputAddButton.value = "";
-		++count;
-	} else {
-		const copiedTask = task.cloneNode(true);
-		copiedTask.querySelector("p").textContent = inputContent;
-		inputAddButton.value = "";
 		taskContainer.appendChild(copiedTask);
 	}
 }
