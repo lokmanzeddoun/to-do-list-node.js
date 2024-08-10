@@ -10,17 +10,16 @@ async function routes(fastify, options) {
 		}
 	});
 	fastify.post("/todos", async (request, reply) => {
-		const { name, important, dueDate } = request.body;
+		const { name, dueDate } = request.body;
 		const id = uuidv4();
-		console.log(id);
 		const done = false;
 		let createdAt = new Date().toISOString();
 		try {
 			const { rows } = await fastify.pg.query(
-				`INSERT INTO todos (id, name, "createdAt", important, "dueDate", done)
-      VALUES($1, $2, $3, $4, $5, $6 )
+				`INSERT INTO todos (id, name, "createdAt",  "dueDate", done)
+      VALUES($1, $2, $3, $4, $5)
        RETURNING *`,
-				[id, name, createdAt, important, dueDate, done]
+				[id, name, createdAt, dueDate, done]
 			);
 			console.log(rows);
 			reply.code(201);
@@ -31,18 +30,16 @@ async function routes(fastify, options) {
 	});
 	fastify.patch("/todos/:id", async (request, reply) => {
 		const id = request.params.id;
-		console.log(id);
-		const { important, dueDate, done } = request.body;
+		const {  dueDate, done } = request.body;
 		try {
 			const { rows } = await fastify.pg.query(
 				`UPDATE todos SET
-        important = COALESCE($1,important),
-        "dueDate"=COALESCE($2,"dueDate"),
-        done = COALESCE($3,done)
-        WHERE id= $4
+        "dueDate"=COALESCE($1,"dueDate"),
+        done = COALESCE($2,done)
+        WHERE id= $3
         RETURNING *
         `,
-				[important, dueDate, done, id]
+				[ dueDate, done, id]
 			);
 			console.log(rows);
 			reply.code(204);

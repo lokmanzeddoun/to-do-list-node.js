@@ -90,15 +90,13 @@ header {
   margin-left: 10px;
   padding: 10px;
 }
-#delete {
+.delete {
   color: #b81f1f;
 }
-#done {
+.done {
   color: #0ab412f8;
 }
-#undo {
-  color: #df8602e1;
-}
+
 .icon label {
   margin: 5px;
   cursor: pointer;

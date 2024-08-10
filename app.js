@@ -1,11 +1,21 @@
 const routes = require("./routes/route");
-
+const cors = require("@fastify/cors");
+const path = require("node:path");
 const fastify = require("fastify")({
 	logger: true,
 });
 require("dotenv").config();
 const port = process.env.PORT || 3000;
+fastify.register(cors, {
+	// put your options here
+});
+// serving static file
 
+fastify.register(require("@fastify/static"), {
+	root: path.join(__dirname, "public"),
+	// prefix: "/", // optional: default '/'
+	// constraints: { host: "example.com" }, // optional: default {}
+});
 // register the database in plugin
 fastify.register(require("@fastify/postgres"), {
 	connectionString: process.env.PG_URL,
